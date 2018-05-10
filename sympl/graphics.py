@@ -6,8 +6,16 @@ Copyright (c) 2018
 import cairo
 
 class Drawable():
-    
+
+    BOTTOM_LEFT = 0    
+    BOTTOM_CENTRE = 1    
+    BOTTOM_RIGHT = 2    
+    MIDDLE_LEFT = 3    
     CENTRE = 4
+    MIDDLE_RIGHT = 5    
+    TOP_LEFT = 6    
+    TOP_CENTRE = 7    
+    TOP_RIGHT = 8    
     
     def __init__(self,
                  visible=True,
@@ -42,8 +50,24 @@ class Drawable():
         
     def get_centre_point(self, ctx):
         x0, y0, x1, y1 = self.bounds(ctx)
+        if self.cp == self.BOTTOM_LEFT:
+            return (x0, y0)
+        if self.cp == self.BOTTOM_CENTRE:
+            return ((x0+x1)/2, y0)
+        if self.cp == self.BOTTOM_RIGHT:
+            return (x1, y0)
+        elif self.cp == self.MIDDLE_LEFT:
+            return (x0, (y0+y1)/2)
         if self.cp == self.CENTRE:
             return ((x0+x1)/2, (y0+y1)/2)
+        if self.cp == self.MIDDLE_RIGHT:
+            return (x1, (y0+y1)/2)
+        elif self.cp == self.TOP_LEFT:
+            return (x0, y1)
+        if self.cp == self.TOP_CENTRE:
+            return ((x0+x1)/2, y1)
+        if self.cp == self.TOP_RIGHT:
+            return (x1, y1)
         else:
             return self.cp
         

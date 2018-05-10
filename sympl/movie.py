@@ -7,17 +7,29 @@ import cairo
 
 class Scene:
     
-    def __init__(self, movie, frames):
+    def __init__(self, movie, frames, background=(1, 1, 1)):
         self.movie = movie
         self.frames = frames
+        self.background = background
         
     def render(self, start_frame):
         self.setup()
         for i in range(self.frames):
             surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, self.movie.width, self.movie.height)
             ctx = cairo.Context(surface)
+            
+            # Draw background
+            ctx.new_path()
+            ctx.rectangle(0, 0, self.movie.width, self.movie.height)
+            ctx.set_source_rgb(*self.background)
+            ctx.fill()
+            
+            #Set up cooridnates
+            ctx.scale(1, -1)
+            ctx.translate(0, -self.movie.height)
+ 
             self.draw(ctx, i)
-            surface.write_to_png('image' + str(start_frame + i) + '.png')
+            surface.write_to_png('/tmp/animation/image{:05d}.png'.format(start_frame + i))
             
     def setup(self):
         pass

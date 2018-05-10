@@ -33,9 +33,9 @@ class Drawable():
         ctx.save()
         if self.rotate is not None:
             centre = self.get_centre_point(ctx)
-            ctx.translate(centre[0], centre[0])
+            ctx.translate(centre[0], centre[1])
             ctx.rotate(self.rotate)
-            ctx.translate(-centre[0], -centre[0])
+            ctx.translate(-centre[0], -centre[1])
         
     def restore_state(self, ctx):
         ctx.restore()

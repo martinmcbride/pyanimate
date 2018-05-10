@@ -21,4 +21,18 @@ class Tween():
         
     def get(self, frame):
         return self.frames[frame] if frame < len(self.frames) else self.previous
+    
+    
+class TweenVector(Tween):
+    def __init__(self, value=(0, 0)):
+        Tween.__init__(self, value)
         
+    def to(self, value, frames):
+        nextvalue=value
+        for i in range(frames):
+            nextvalue = []
+            for a, b in zip(self.previous, value):
+                nextvalue.append(a + i*(b - a)/frames)
+            self.frames.append(nextvalue)
+        self.previous = value
+        return self

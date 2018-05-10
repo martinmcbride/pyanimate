@@ -21,7 +21,7 @@ class Drawable():
                  visible=True,
                  alpha=None,
                  cp=(0, 0),
-                 translate=(0, 0),
+                 translate=None,
                  scale=None,
                  rotate=None):
         self.visible = visible
@@ -39,10 +39,12 @@ class Drawable():
     
     def create_state(self, ctx):
         ctx.save()
-        if self.rotate is not None:
+        t = self.translate if self.translate is not None else (0, 0)
+        if self.rotate is not None or self.translate is not None:
             centre = self.get_centre_point(ctx)
-            ctx.translate(centre[0], centre[1])
-            ctx.rotate(self.rotate)
+            ctx.translate(centre[0]+t[0], centre[1]+t[1])
+            if self.rotate is not None:
+                ctx.rotate(self.rotate)
             ctx.translate(-centre[0], -centre[1])
         
     def restore_state(self, ctx):

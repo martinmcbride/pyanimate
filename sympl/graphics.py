@@ -27,8 +27,8 @@ class Drawable():
         self.visible = visible
         self.alpha = alpha
         self.cp = cp
-        self.translate = translate[:]
-        self.scale=None
+        self.translate = translate
+        self.scale=scale
         self.rotate = rotate
         
     def draw(self, ctx):
@@ -40,11 +40,13 @@ class Drawable():
     def create_state(self, ctx):
         ctx.save()
         t = self.translate if self.translate is not None else (0, 0)
-        if self.rotate is not None or self.translate is not None:
+        if self.rotate is not None or self.scale is not None or self.translate is not None:
             centre = self.get_centre_point(ctx)
             ctx.translate(centre[0]+t[0], centre[1]+t[1])
             if self.rotate is not None:
                 ctx.rotate(self.rotate)
+            if self.scale is not None:
+                ctx.scale(*self.scale)
             ctx.translate(-centre[0], -centre[1])
         
     def restore_state(self, ctx):
@@ -145,4 +147,34 @@ class Text(Drawable):
     def bounds(self, ctx):
         x, y, width, height, dx, dy = ctx.text_extents(self.text)
         return (self.position[0], self.position[1], self.position[0]+width, self.position[1]+height)
+            
+class Image(Drawable):
+    
+    def __init__(self,
+                 path,
+                 visible=True,
+                 alpha=None,
+                 cp=(0, 0),
+                 translate=(0, 0),
+                 scale=None,
+                 rotate=None,
+                 position=(0, 0),
+                 width=100,
+                 height=100):
+        Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
+        self.position = position[:]
+        self.width = width
+        self.height = height
+        self.path = path
+
+    def draw(self, ctx):
+        if self.visible:
+            img = cairo.ImageSurface.create_from_png(self.path)
+            Drawable.create_state(self, ctx)
+            ctx.set_source_surface(img, self.position[0], self.position[1])
+            ctx.paint()
+            Drawable.restore_state(self, ctx)
+            
+    def bounds(self, ctx):
+        return (self.position[0], self.position[1], self.position[0]+self.width, self.position[1]+self.height)
             

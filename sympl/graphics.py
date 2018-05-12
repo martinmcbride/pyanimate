@@ -88,19 +88,28 @@ class Rectangle(Drawable):
                  rotate=None,
                  width=100,
                  height=100,
-                 color=(0, 0, 0)):
+                 fillcolor=(0, 0, 0),
+                 linecolor=None,
+                 linewidth=1):
         Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
         self.width = width
         self.height = height
-        self.color = color[:]
+        self.fillcolor = fillcolor
+        self.linecolor = linecolor
+        self.linewidth = linewidth
 
     def draw(self, ctx):
-        if self.visible:
+        if self.visible and (self.fillcolor or self.linecolor):
             Drawable.create_state(self, ctx)
             ctx.new_path()
             ctx.rectangle(0, 0, self.width, self.height)
-            ctx.set_source_rgb(*self.color)
-            ctx.fill()
+            if self.fillcolor:
+                ctx.set_source_rgb(*self.fillcolor)
+                ctx.fill_preserve() if self.linecolor else ctx.fill()
+            if self.linecolor:
+                ctx.set_source_rgb(*self.linecolor)
+                ctx.set_line_width(self.linewidth)
+                ctx.stroke()
             Drawable.restore_state(self, ctx)
             
     def bounds(self, ctx):
@@ -118,12 +127,12 @@ class Text(Drawable):
                  text='text',
                  font='ariel',
                  size=16,
-                 color=(0, 0, 0)):
+                 fillcolor=(0, 0, 0)):
         Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
         self.text = text
         self.font = font
         self.size = size
-        self.color = color[:]
+        self.fillcolor = fillcolor
 
     def draw(self, ctx):
         if self.visible:
@@ -134,7 +143,7 @@ class Text(Drawable):
             Drawable.create_state(self, ctx)
             ctx.new_path()
             ctx.move_to(0, 0)
-            ctx.set_source_rgb(*self.color)
+            ctx.set_source_rgb(*self.fillcolor)
             ctx.show_text(self.text)
             Drawable.restore_state(self, ctx)
             

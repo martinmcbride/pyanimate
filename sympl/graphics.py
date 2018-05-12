@@ -48,7 +48,7 @@ class Drawable():
             if self.scale is not None:
                 ctx.scale(*self.scale)
             ctx.translate(-centre[0], -centre[1])
-        
+            
     def restore_state(self, ctx):
         ctx.restore()
         
@@ -86,12 +86,10 @@ class Rectangle(Drawable):
                  translate=(0, 0),
                  scale=None,
                  rotate=None,
-                 position=(0, 0),
                  width=100,
                  height=100,
                  color=(0, 0, 0)):
         Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
-        self.position = position[:]
         self.width = width
         self.height = height
         self.color = color[:]
@@ -100,13 +98,13 @@ class Rectangle(Drawable):
         if self.visible:
             Drawable.create_state(self, ctx)
             ctx.new_path()
-            ctx.rectangle(self.position[0], self.position[1], self.width, self.height)
+            ctx.rectangle(0, 0, self.width, self.height)
             ctx.set_source_rgb(*self.color)
             ctx.fill()
             Drawable.restore_state(self, ctx)
             
     def bounds(self, ctx):
-        return (self.position[0], self.position[1], self.position[0]+self.width, self.position[1]+self.height)
+        return (0, 0, self.width, self.height)
 
 class Text(Drawable):
     
@@ -117,13 +115,11 @@ class Text(Drawable):
                  translate=(0, 0),
                  scale=None,
                  rotate=None,
-                 position=(0, 0),
                  text='text',
                  font='ariel',
                  size=16,
                  color=(0, 0, 0)):
         Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
-        self.position = position[:]
         self.text = text
         self.font = font
         self.size = size
@@ -137,16 +133,14 @@ class Text(Drawable):
             ctx.set_font_size(self.size)
             Drawable.create_state(self, ctx)
             ctx.new_path()
-            ctx.move_to(self.position[0], self.position[1])
+            ctx.move_to(0, 0)
             ctx.set_source_rgb(*self.color)
-            ctx.scale(1, -1) #Draw text right way up
             ctx.show_text(self.text)
-            ctx.scale(1, -1)
             Drawable.restore_state(self, ctx)
             
     def bounds(self, ctx):
         x, y, width, height, dx, dy = ctx.text_extents(self.text)
-        return (self.position[0], self.position[1], self.position[0]+width, self.position[1]+height)
+        return (0, 0, width, height)
             
 class Image(Drawable):
     
@@ -158,11 +152,9 @@ class Image(Drawable):
                  translate=(0, 0),
                  scale=None,
                  rotate=None,
-                 position=(0, 0),
                  width=100,
                  height=100):
         Drawable.__init__(self, visible, alpha, cp, translate, scale, rotate)
-        self.position = position[:]
         self.width = width
         self.height = height
         self.path = path
@@ -171,10 +163,10 @@ class Image(Drawable):
         if self.visible:
             img = cairo.ImageSurface.create_from_png(self.path)
             Drawable.create_state(self, ctx)
-            ctx.set_source_surface(img, self.position[0], self.position[1])
+            ctx.set_source_surface(img, 0, 0)
             ctx.paint()
             Drawable.restore_state(self, ctx)
             
     def bounds(self, ctx):
-        return (self.position[0], self.position[1], self.position[0]+self.width, self.position[1]+self.height)
+        return (0, 0, self.width, self.height)
             

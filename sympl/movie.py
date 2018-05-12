@@ -24,10 +24,6 @@ class Scene:
             ctx.set_source_rgb(*self.background)
             ctx.fill()
             
-            #Set up cooridnates
-            ctx.scale(1, -1)
-            ctx.translate(0, -self.movie.height)
- 
             self.draw(ctx, i)
             surface.write_to_png('/tmp/animation/image{:05d}.png'.format(start_frame + i))
             

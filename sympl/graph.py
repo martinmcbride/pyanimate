@@ -1,4 +1,5 @@
 import cairo
+import numpy as np
 import math
 
 class Axes:
@@ -68,4 +69,11 @@ def plot_curve(ctx, fn, axes, extent=None):
         for p in points[1:]:
             ctx.line_to(*axes.axes_to_pixel(p))
 
-
+def attribution(ctx, size):
+    ctx.set_source_rgb(0.5, 0, 0)
+    ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    ctx.set_font_size(20)
+    s = 'graphicmaths.com'
+    x, y, width, height, dx, dy = ctx.text_extents(s)
+    ctx.move_to(size[0]-width-4, size[1]-4)
+    ctx.show_text(s)

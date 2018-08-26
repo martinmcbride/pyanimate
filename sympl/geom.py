@@ -17,6 +17,12 @@ def make_cairo_frames(size, count, draw):
         frame = np.array(img)
         yield(frame)
 
+def draw_point(ctx, pos, size, color=(0, 0, 0)):
+    ctx.arc(pos[0], pos[1], size, 0, 2*math.pi)
+    ctx.set_source_rgb(*color)
+    ctx.fill()
+
+
 #
 # Draw a tick on a the line ab
 #

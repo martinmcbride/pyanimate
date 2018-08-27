@@ -9,6 +9,10 @@ class Tween():
         self.frames = []
         self.previous = value
         
+    def wait(self, frames):
+        self.frames.extend([self.previous for i in range(frames)])
+        return self
+        
     def set(self, value, frames):
         self.frames.extend([value for i in range(frames)])
         self.previous = value

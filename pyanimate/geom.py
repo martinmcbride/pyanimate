@@ -1,39 +1,80 @@
-import cairo
-from PIL import Image
 import numpy as np
 import math
 
 
-def make_cairo_frames(size, count, draw):
-    for i in range(count):
-        surface = cairo.ImageSurface(cairo.FORMAT_RGB24, size[0], size[1])
-        ctx = cairo.Context(surface)
-        ctx.rectangle(0, 0, size[0], size[1])
-        ctx.set_source_rgb(1, 1, 1)
-        ctx.fill()
-        draw(ctx, size, count, i)
-        surface.write_to_png('__make_cairo_frames__.png')
-        img = Image.open('__make_cairo_frames__.png')
-        frame = np.array(img)
-        yield(frame)
+class MathsCoords:
+    """
+    Holds the maths coordinate system, where shapes and graphs are defined
+    This maps maths coordinates onto pixel coordinates
+    """
 
-def draw_point(ctx, pos, size, color=(0, 0, 0)):
-    ctx.arc(pos[0], pos[1], size, 0, 2*math.pi)
+    def __init__(self, pixel_size, start, extent):
+        """
+        Initialise
+        :param pixel_size: pixel dimensions of space tuple (width, height)
+        :param start: bottom left position in maths coordinates, tuple (x, y)
+        :param extent: size in maths coordinates, tuple (width, height)
+        """
+        self.pixel_size = pixel_size
+        self.start = start
+        self.extent = extent
+
+    def p2l(self, x):
+        """
+        Convert a size in pixels to a length in math space.
+        Only uses x scaling
+        :param x: pixel length
+        :return: length in maths space
+        """
+        return x*self.pixel_size[0]/self.extent[0]
+
+    def c2p(self, pos):
+        """
+        Convert coordinate position to pixel position
+        :param pos: position in maths space, tuple (x, y)
+        :return: position in pixel space, tuple (x, y)
+        """
+        px = (pos[0] - self.start[0]) * self.pixel_size[0] / self.extent[0]
+        py = self.pixel_size[1] - (pos[1] - self.start[1]) * self.pixel_size[1] / self.extent[1]
+        return px, py
+
+    def push(self, ctx):
+        ctx.save()
+        #TODO scale and flip
+
+    def pop(self):
+        ctx.restore()
+
+
+def draw_point(ctx, coords, pos, size, color=(0, 0, 0)):
+    """
+    Draw a point
+    :param ctx: context
+    :param coords: current maths space
+    :param pos: position of point in maths space
+    :param size: size of point in pixels
+    :param color: color (r, g, b) range 0 to 1
+    :return:
+    """
+    p = coords.c2p(pos)
+    ctx.arc(p[0], p[1], size, 0, 2*math.pi)
     ctx.set_source_rgb(*color)
     ctx.fill()
 
 
-#
-# Draw a tick on a the line ab
-#
-# Draws a line half way along the line ab, at right angles
-# to it.
-#
-# ctx - pycairo context
-# a - (x, y) tuple point a
-# b - (x, y) tuple point b
-# size - length of tick
-def draw_tick(ctx, a, b, size, count=1):
+def draw_tick(ctx, a, b, size, count=1, line_color=(0, 0, 0), line_width=1):
+    """
+    Draw a tick on a the line ab
+
+    Draws a line half way along the line ab, at right angles
+    to it.
+    :param ctx: context
+    :param a: (x, y) tuple point a
+    :param b: (x, y) tuple point b
+    :param size: length of tick (pixels)
+    :param count: number of ticks
+    :return: None
+    """
     a = np.asarray(a)
     b = np.asarray(b)
     c = (a + b)/2
@@ -42,8 +83,14 @@ def draw_tick(ctx, a, b, size, count=1):
 
     for i in range(count):
         pos = c + c_step*i
-        d = pos[0]+size*math.cos(ang), pos[1]+size*math.sin(ang)
-        e = pos[0]-size*math.cos(ang), pos[1]-size*math.sin(ang)
+        p = coords.c2p(pos)
+        d = p[0]+size*math.cos(ang), p[1]+size*math.sin(ang)
+        e = p[0]-size*math.cos(ang), p[1]-size*math.sin(ang)
         ctx.move_to(*d)
         ctx.line_to(*e)
+
+    ctx.set_source_rgb(*line_color)
+    ctx.set_line_width(line_width)
+    ctx.fill()
+
     

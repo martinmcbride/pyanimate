@@ -26,7 +26,7 @@ class MathsCoords:
         :param x: pixel length
         :return: length in maths space
         """
-        return x*self.pixel_size[0]/self.extent[0]
+        return x*self.extent[0]/self.pixel_size[0]
 
     def c2p(self, pos):
         """
@@ -40,29 +40,127 @@ class MathsCoords:
 
     def push(self, ctx):
         ctx.save()
-        #TODO scale and flip
+        ctx.scale(self.pixel_size[0]/self.extent[0], -self.pixel_size[1]/self.extent[1])
+        ctx.translate(-self.start[0], -(self.start[1]+self.extent[1]))
 
-    def pop(self):
+    def pop(self, ctx):
         ctx.restore()
 
-
-def draw_point(ctx, coords, pos, size, color=(0, 0, 0)):
+def fill_stroke(ctx, fill_color=None, line_color=None, line_width=1):
     """
-    Draw a point
-    :param ctx: context
-    :param coords: current maths space
-    :param pos: position of point in maths space
-    :param size: size of point in pixels
-    :param color: color (r, g, b) range 0 to 1
+    Fill and or stoke current path
+    fill_color of None means no fill
+    line_color of None means no stroke
+    :param ctx: cairo context
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
     :return:
     """
-    p = coords.c2p(pos)
-    ctx.arc(p[0], p[1], size, 0, 2*math.pi)
-    ctx.set_source_rgb(*color)
-    ctx.fill()
+    if fill_color:
+        ctx.set_source_rgb(*fill_color)
+        if line_color:
+            ctx.fill_preserve()
+        else:
+            ctx.fill()
+    if line_color:
+        ctx.set_line_width(line_width)
+        ctx.set_source_rgb(*line_color)
+        ctx.stroke()
+
+def line(ctx, a, b, line_color=None, line_width=1):
+    """
+    Draw a line from a to b
+    :param ctx: cairo context
+    :param a: tuple (x, y) start of line
+    :param b: tuple (x, y) end of line
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
+    :return:
+    """
+    ctx.move_to(*a)
+    ctx.line_to(*b)
+    fill_stroke(ctx, None, line_color, line_width)
+
+def circle(ctx, centre, radius, fill_color=None, line_color=None, line_width=1):
+    """
+    Draw a circle with centre and radius
+    :param ctx: cairo context
+    :param centre: tuple (x, y) centre of circle
+    :param radius: radius of circle
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
+    :return:
+    """
+    ctx.arc(*centre, radius, 0, 2*math.pi)
+    fill_stroke(ctx, fill_color, line_color, line_width)
+
+def arc(ctx, centre, radius, start_angle, end_angle, fill_color=None, line_color=None, line_width=1):
+    """
+    Draw an arc with centre and radius
+    :param ctx: cairo context
+    :param centre: tuple (x, y) centre of circle
+    :param radius: radius of circle
+    :param start_angle: start angle of arc, ccw from x axis
+    :param end_angle: end angle of arc, ccw from x axis
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
+    :return:
+    """
+    ctx.arc(*centre, radius, start_angle, end_angle)
+    fill_stroke(ctx, fill_color, line_color, line_width)
+
+def sector(ctx, centre, radius, start_angle, end_angle, fill_color=None, line_color=None, line_width=1):
+    """
+    Draw a sector with centre and radius
+    :param ctx: cairo context
+    :param centre: tuple (x, y) centre of circle
+    :param radius: radius of circle
+    :param start_angle: start angle of arc, ccw from x axis
+    :param end_angle: end angle of arc, ccw from x axis
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
+    :return:
+    """
+    ctx.move_to(*centre)
+    ctx.arc(*centre, radius, start_angle, end_angle)
+    ctx.close_path()
+    fill_stroke(ctx, fill_color, line_color, line_width)
+
+def segment(ctx, centre, radius, start_angle, end_angle, fill_color=None, line_color=None, line_width=1):
+    """
+    Draw a segment with centre and radius
+    :param ctx: cairo context
+    :param centre: tuple (x, y) centre of circle
+    :param radius: radius of circle
+    :param start_angle: start angle of arc, ccw from x axis
+    :param end_angle: end angle of arc, ccw from x axis
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke
+    :return:
+    """
+    ctx.arc(*centre, radius, start_angle, end_angle)
+    ctx.close_path()
+    fill_stroke(ctx, fill_color, line_color, line_width)
+
+def point(ctx, pos, size, fill_color=(0, 0, 0)):
+    """
+    Draw a point
+    :param ctx: cairo context
+    :param pos: position of point
+    :param size: size of point
+    :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :return:
+    """
+    ctx.arc(pos[0], pos[1], size, 0, 2*math.pi)
+    fill_stroke(ctx, fill_color=fill_color)
 
 
-def draw_tick(ctx, a, b, size, count=1, line_color=(0, 0, 0), line_width=1):
+def tick(ctx, a, b, size, count=1, line_color=(0, 0, 0), line_width=1):
     """
     Draw a tick on a the line ab
 

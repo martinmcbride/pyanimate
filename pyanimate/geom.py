@@ -118,8 +118,8 @@ def line(mctx, a, b, line_color=None, line_width=1):
     mctx.push_maths()
     mctx.ctx.move_to(*a)
     mctx.ctx.line_to(*b)
-#    mctx.pop()
-#    mctx.push_page()
+    mctx.pop()
+    mctx.push_page()
     fill_stroke(mctx, None, line_color, line_width)
     mctx.pop()
 
@@ -221,19 +221,18 @@ def point(mctx, pos, size, fill_color=(0, 0, 0)):
     p = mctx.cm2p(pos)
     s = mctx.pg2l(size)
     mctx.ctx.arc(p[0], p[1], s, 0, 2*math.pi)
-    mctx.push_page()
     fill_stroke(mctx, fill_color=fill_color)
 
 
 def label(mctx, pos, size, text, fill_color=(0, 0, 0)):
     mctx.push_maths()
-    mctx.ctx.set_source_rgb(*fill_color)
-    mctx.ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
-    mctx.ctx.set_font_size(size)
     mctx.ctx.move_to(*pos)
     mctx.pop()
     mctx.push_page()
     mctx.ctx.scale(1, -1)
+    mctx.ctx.set_source_rgb(*fill_color)
+    mctx.ctx.select_font_face("Arial", cairo.FONT_SLANT_NORMAL, cairo.FONT_WEIGHT_NORMAL)
+    mctx.ctx.set_font_size(size)
     mctx.ctx.show_text(text)
     mctx.pop()
 

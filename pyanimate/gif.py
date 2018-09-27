@@ -3,7 +3,9 @@
 # Copyright (C) 2018, Martin McBride
 # License: MIT
 
+
 import imageio
+import subprocess
 
 
 def save_animated_gif(filepath, frames, delay, loop=0):
@@ -11,5 +13,6 @@ def save_animated_gif(filepath, frames, delay, loop=0):
         filepath += '.gif'
     images = list(frames)
     imageio.mimsave(filepath, images, duration=delay)
+    subprocess.run(['gifsicle', '-b', '--colors', '256', filepath])
 
 

@@ -30,14 +30,14 @@ class Axes:
 
         for p in self.get_divs(self.mctx.start[0], self.mctx.extent[0], self.divisions[0]):
            if abs(p)>0.001:
-                pstr = str(round(p*1000)/1000)
+                pstr = self.format_div(p, self.divisions[0])
                 ppx = self.mctx.cm2p((p, 0))
                 x, y, width, height, dx, dy = self.mctx.ctx.text_extents(pstr)
                 self.mctx.ctx.move_to(ppx[0] - width - 4, ppx[1] + height + 4)
                 self.mctx.ctx.show_text(pstr)
         for p in self.get_divs(self.mctx.start[1], self.mctx.extent[1], self.divisions[1]):
             if abs(p)>0.001:
-                pstr = str(round(p*1000)/1000)
+                pstr = self.format_div(p, self.divisions[1])
                 ppx = self.mctx.cm2p((0, p))
                 x, y, width, height, dx, dy = self.mctx.ctx.text_extents(pstr)
                 self.mctx.ctx.move_to(ppx[0]-width-4, ppx[1]+height+4)
@@ -67,7 +67,30 @@ class Axes:
             n += div
         return divs
 
-def plot_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=3):
+    def format_div(self, value, div):
+        """
+        Formats a division value into a string.
+        If the division spacing is an integer, the string will be an integer (no dp).
+        If the division spacing is float, the string will be a float with a suitable number of decimal places
+        :param value: value to be formated
+        :param div: division spacing
+        :return: string representation of the value
+        """
+        if isinstance(value, int):
+            return str(value)
+        return str(round(value*1000)/1000)
+
+def plot_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
+    """
+    Plot an y = fn(x)
+    :param mctx: maths context
+    :param fn: the function, a function object taking 1 number and returning a number
+    :param color: color of line (r, g, b) each channel in range 0.0 to 1.0
+    :param extent: tuple (start, end) giving extent of curve, or None for the curve to fill the x range
+    :param lw: line width in page space
+    :return:
+    """
+    mctx.push_maths()
     points = []
     for x in np.linspace(mctx.start[0], mctx.start[0]+mctx.extent[0], 100):
         if not extent or extent[0] < x < extent[1]:
@@ -76,12 +99,24 @@ def plot_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=3):
         mctx.ctx.move_to(*points[0])
         for p in points[1:]:
             mctx.ctx.line_to(*p)
+    mctx.pop()
+    mctx.push_page()
     mctx.ctx.set_source_rgb(*color)
     mctx.ctx.set_line_width(lw)
     mctx.ctx.stroke()
- 
+    mctx.pop()
 
-def plot_yx_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=3):
+def plot_yx_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
+    """
+    Plot an x = fn(y)
+    :param mctx: maths context
+    :param fn: the function, a function object taking 1 number and returning a number
+    :param color: color of line (r, g, b) each channel in range 0.0 to 1.0
+    :param extent: tuple (start, end) giving extent of curve, or None for the curve to fill the y range
+    :param lw: line width in page space
+    :return:
+    """
+    mctx.push_maths()
     points = []
     for y in np.linspace(mctx.start[1], mctx.start[1]+mctx.extent[1], 100):
         if not extent or extent[0] < y < extent[1]:
@@ -90,10 +125,13 @@ def plot_yx_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=3):
         mctx.ctx.move_to(*points[0])
         for p in points[1:]:
             mctx.ctx.line_to(*p)
+    mctx.pop()
+    mctx.push_page()
     mctx.ctx.set_source_rgb(*color)
     mctx.ctx.set_line_width(lw)
     mctx.ctx.stroke()
- 
+    mctx.pop()
+
 
 def attribution(ctx, size, text, color=(0.5, 0, 0)):
     ctx.set_source_rgb(*color)

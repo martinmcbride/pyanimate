@@ -209,19 +209,34 @@ def segment(mctx, centre, radius, start_angle, end_angle, fill_color=None, line_
     mctx.pop()
 
 
-def point(mctx, pos, size, fill_color=(0, 0, 0)):
+def point(mctx, pos, size, fill_color=(0, 0, 0), line_color=None, line_width=1, style='circle'):
     """
     Draw a point
     :param mctx: maths context
     :param pos: position of point in maths coords
     :param size: size of point in page units
     :param fill_color: fill color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: line color (r, g, b) each channel in range 0.0 to 1.0
+    :param line_width: width of stroke in page units
+    :param style: shape of point marker
     :return:
     """
     p = mctx.cm2p(pos)
     s = mctx.pg2l(size)
-    mctx.ctx.arc(p[0], p[1], s, 0, 2*math.pi)
-    fill_stroke(mctx, fill_color=fill_color)
+    lw = mctx.pg2l(line_width)
+
+    if style=='cross':
+        mctx.ctx.move_to(p[0]-s, p[1]-s)
+        mctx.ctx.line_to(p[0]+s, p[1]+s)
+        mctx.ctx.move_to(p[0]-s, p[1]+s)
+        mctx.ctx.line_to(p[0]+s, p[1]-s)
+        fill_stroke(mctx, fill_color, line_color, lw)
+    elif style == 'square':
+        mctx.ctx.rectangle(p[0] - s, p[1] - s, s * 2, s * 2)
+        fill_stroke(mctx, fill_color, line_color, lw)
+    else:
+        mctx.ctx.arc(p[0], p[1], s, 0, 2*math.pi)
+        fill_stroke(mctx, fill_color, line_color, lw)
 
 
 def label(mctx, pos, size, text, fill_color=(0, 0, 0)):

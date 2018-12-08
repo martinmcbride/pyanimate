@@ -80,20 +80,20 @@ class Axes:
             return str(value)
         return str(round(value*1000)/1000)
 
-def plot_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
+def plot_curve(mctx, fn, line_color=(1, 0, 0), extent=None, line_width=.7):
     """
     Plot an y = fn(x)
     :param mctx: maths context
     :param fn: the function, a function object taking 1 number and returning a number
-    :param color: color of line (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: color of line (r, g, b) each channel in range 0.0 to 1.0
     :param extent: tuple (start, end) giving extent of curve, or None for the curve to fill the x range
-    :param lw: line width in page space
+    :param line_width: line width in page space
     :return:
     """
     mctx.push_maths()
     points = []
     for x in np.linspace(mctx.start[0], mctx.start[0]+mctx.extent[0], 100):
-        if not extent or extent[0] < x < extent[1]:
+        if not extent or extent[0] <= x <= extent[1]:
             points.append((x, fn(x)))
     if points:
         mctx.ctx.move_to(*points[0])
@@ -101,25 +101,25 @@ def plot_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
             mctx.ctx.line_to(*p)
     mctx.pop()
     mctx.push_page()
-    mctx.ctx.set_source_rgb(*color)
-    mctx.ctx.set_line_width(lw)
+    mctx.ctx.set_source_rgb(*line_color)
+    mctx.ctx.set_line_width(line_width)
     mctx.ctx.stroke()
     mctx.pop()
 
-def plot_yx_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
+def plot_yx_curve(mctx, fn, line_color=(1, 0, 0), extent=None, line_width=.7):
     """
     Plot an x = fn(y)
     :param mctx: maths context
     :param fn: the function, a function object taking 1 number and returning a number
-    :param color: color of line (r, g, b) each channel in range 0.0 to 1.0
+    :param line_color: color of line (r, g, b) each channel in range 0.0 to 1.0
     :param extent: tuple (start, end) giving extent of curve, or None for the curve to fill the y range
-    :param lw: line width in page space
+    :param line_width: line width in page space
     :return:
     """
     mctx.push_maths()
     points = []
     for y in np.linspace(mctx.start[1], mctx.start[1]+mctx.extent[1], 100):
-        if not extent or extent[0] < y < extent[1]:
+        if not extent or extent[0] <= y <= extent[1]:
             points.append((fn(y), y))
     if points:
         mctx.ctx.move_to(*points[0])
@@ -127,8 +127,36 @@ def plot_yx_curve(mctx, fn, color=(1, 0, 0), extent=None, lw=.7):
             mctx.ctx.line_to(*p)
     mctx.pop()
     mctx.push_page()
-    mctx.ctx.set_source_rgb(*color)
-    mctx.ctx.set_line_width(lw)
+    mctx.ctx.set_source_rgb(*line_color)
+    mctx.ctx.set_line_width(line_width)
+    mctx.ctx.stroke()
+    mctx.pop()
+
+
+def plot_polar_curve(mctx, fn, line_color=(1, 0, 0), extent=None, line_width=.7):
+    """
+    Plot an r = fn(theta)
+    :param mctx: maths context
+    :param fn: the function, a function object taking 1 number and returning a number
+    :param line_color: color of line (r, g, b) each channel in range 0.0 to 1.0
+    :param extent: tuple (start, end) giving extent of curve, or None for the curve to fill the y range
+    :param line_width: line width in page space
+    :return:
+    """
+    mctx.push_maths()
+    points = []
+    for theta in np.linspace(0, 2*math.pi, 100):
+        if not extent or extent[0] <= theta <= extent[1]:
+            r = fn(theta)
+            points.append((r*math.cos(theta), r*math.sin(theta)))
+    if points:
+        mctx.ctx.move_to(*points[0])
+        for p in points[1:]:
+            mctx.ctx.line_to(*p)
+    mctx.pop()
+    mctx.push_page()
+    mctx.ctx.set_source_rgb(*line_color)
+    mctx.ctx.set_line_width(line_width)
     mctx.ctx.stroke()
     mctx.pop()
 
